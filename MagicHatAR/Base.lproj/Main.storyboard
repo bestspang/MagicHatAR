@@ -26,10 +26,13 @@
                                     <outletCollection property="gestureRecognizers" destination="ZcI-Rh-gq0" appends="YES" id="X2T-yP-CaL"/>
                                 </connections>
                             </arscnView>
-                            <button opaque="NO" alpha="0.69999999999999996" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WzS-hH-Sxq" userLabel="magicButton">
+                            <button opaque="NO" alpha="0.69999999999999996" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WzS-hH-Sxq" userLabel="magicButton">
                                 <rect key="frame" x="16" y="710" width="98" height="30"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" red="0.99999600649999998" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="98" id="4d0-KV-3hU"/>
+                                    <constraint firstAttribute="height" constant="30" id="Xsi-d8-tmB"/>
+                                </constraints>
                                 <state key="normal" title="magic">
                                     <color key="titleColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </state>
@@ -72,6 +75,8 @@
                             <constraint firstItem="YuF-E2-Opw" firstAttribute="top" secondItem="ZGa-M0-HdZ" secondAttribute="top" constant="391" id="9VT-Tn-RuN"/>
                             <constraint firstItem="igU-zD-Dqj" firstAttribute="trailing" secondItem="ku8-ML-irf" secondAttribute="trailing" constant="16" id="Chh-jQ-3gL"/>
                             <constraint firstItem="0ZZ-TT-JkJ" firstAttribute="leading" secondItem="igU-zD-Dqj" secondAttribute="leading" constant="16" id="FZK-by-ILs"/>
+                            <constraint firstItem="igU-zD-Dqj" firstAttribute="bottom" secondItem="WzS-hH-Sxq" secondAttribute="bottom" constant="38" id="Gp4-9B-E2n"/>
+                            <constraint firstItem="WzS-hH-Sxq" firstAttribute="leading" secondItem="igU-zD-Dqj" secondAttribute="leading" constant="16" id="Kgs-be-zlB"/>
                             <constraint firstItem="BrB-h1-WRS" firstAttribute="trailing" secondItem="igU-zD-Dqj" secondAttribute="trailing" id="Sw8-bE-w3q"/>
                             <constraint firstItem="BrB-h1-WRS" firstAttribute="leading" secondItem="igU-zD-Dqj" secondAttribute="leading" id="WMJ-s3-nl1"/>
                             <constraint firstItem="BrB-h1-WRS" firstAttribute="top" secondItem="ZGa-M0-HdZ" secondAttribute="top" id="YOg-Ua-hPr"/>

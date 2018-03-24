@@ -39,7 +39,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
-        // Create a new scene
+
         //let scene = SCNScene(named: "art.scnassets/magichat.scn")!
         let scene = SCNScene()
         // Set the scene to the view
@@ -78,10 +78,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
         if let lightEstimate = self.sceneView.session.currentFrame?.lightEstimate {
             
-            let light = sceneView.scene.rootNode.childNode(withName: "omni", recursively: true)
-            let light2 = sceneView.scene.rootNode.childNode(withName: "omni2", recursively: true)
-            light?.light?.intensity = lightEstimate.ambientIntensity
-            light2?.light?.intensity = lightEstimate.ambientIntensity
+            guard let light = sceneView.scene.rootNode.childNode(withName: "omni", recursively: true) else { return }
+            guard let light2 = sceneView.scene.rootNode.childNode(withName: "omni2", recursively: true) else { return }
+            light.light?.intensity = lightEstimate.ambientIntensity
+            light2.light?.intensity = lightEstimate.ambientIntensity
             //self.sceneView.scene.rootNode.light?.intensity = lightEstimate.ambientIntensity/1000
         }
     }
@@ -109,19 +109,22 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             let hat = sceneView.scene.rootNode.childNode(withName: "hat", recursively: true)
             playScoreSound(toNode: (hat?.childNode(withName: "mainHat", recursively: true))!)
             //add invisible
+            
             for i in balls {
-                if (hatBound?.boundingBoxContains(point: i.presentation.position))! {
+                if detectBall(i) {
                     //i.removeFromParentNode()
                     if isBallVisibled {
-                        i.opacity = 0
-                        isBallVisibled = false
+                        if i.opacity == 1 {
+                            i.opacity = 0
+                        }
                     } else {
-                        i.opacity = 1
-                        isBallVisibled = true
+                        if i.opacity == 0 {
+                            i.opacity = 1
+                        }
                     }
                 }
             }
-            
+            if isBallVisibled { isBallVisibled = false } else { isBallVisibled = true }
         }
     }
     
@@ -131,17 +134,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     @IBAction func didTap(_ sender: UITapGestureRecognizer) {
-        //guard let hatNodes = hatNodes?.presentation else { return }
-        //print("Tapped")
+        
         if isHatPlaced == false {
             if planes.count > 0 {
-            // Get tap location
             let tapLocation = sender.location(in: sceneView)
-            
-            // Perform hit test
             let results = sceneView.hitTest(tapLocation, types: .existingPlaneUsingExtent)
-            
-            // If a hit was received, get position of
             if let result = results.first {
                 placeHat(result)
             }
@@ -163,14 +160,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     private func placeHat(_ result: ARHitTestResult) {
         
-        // Get transform of result
         let transform = result.worldTransform
-        
-        // Get position from transform (4th column of transformation matrix)
         let planePosition = SCNVector3Make(transform.columns.3.x, transform.columns.3.y, transform.columns.3.z)
         
-        // Add door
-        let hatNode = createHatFromScene(planePosition)!
+        // Add hat
+        guard let hatNode = createHatFromScene(planePosition) else { return }
         hatNodes = hatNode
         sceneView.scene.rootNode.addChildNode(hatNode)
         bodyAppear("hat")
@@ -188,7 +182,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     private func createHatFromScene(_ position: SCNVector3) -> SCNNode? {
         guard let url = Bundle.main.url(forResource: "art.scnassets/magichat", withExtension: "scn") else {
-            NSLog("Could not find door scene")
+            NSLog("could not find a scene")
             return nil
         }
         guard let node = SCNReferenceNode(url: url) else { return nil }
@@ -201,17 +195,15 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     private func placeBall() {
-
-        
+        guard let sphereNode = createBall() else { return }
         let camera = self.sceneView.pointOfView!
-        let sphereNode = createBall()
         let position = SCNVector3(x: 0, y: 0, z: -0.1)
-        sphereNode?.position = camera.convertPosition(position, to: nil)
-        sphereNode?.rotation = camera.rotation
+        sphereNode.position = camera.convertPosition(position, to: nil)
+        sphereNode.rotation = camera.rotation
         
-        sphereNode?.physicsBody?.applyForce(getBallDirection(-3.5)!, asImpulse: true)
-        balls.append(sphereNode!)
-        sceneView.scene.rootNode.addChildNode(sphereNode!)
+        sphereNode.physicsBody?.applyForce(getBallDirection(-3.5)!, asImpulse: true)
+        balls.append(sphereNode)
+        sceneView.scene.rootNode.addChildNode(sphereNode)
         
     }
     
@@ -264,7 +256,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         let planeNode = SCNNode(geometry: plane)
         planeNode.position = SCNVector3Make(planeAnchor.center.x, 0, planeAnchor.center.z)
-        
         planeNode.transform = SCNMatrix4MakeRotation(-Float.pi / 2, 1, 0, 0)
         // if plane > 1 deletes get only the lastest one
         if planes.count > 1 {
@@ -291,6 +282,31 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
     }
     
+    private func detectBall(_ node: SCNNode) -> Bool {
+        
+        guard isHatPlaced else {
+            return false
+        }
+        
+        guard let mainHat = sceneView.scene.rootNode.childNode(withName: "mainHat", recursively: true) else {
+            return false
+        }
+        // convert position to Hat node space
+        let min = mainHat.convertPosition((mainHat.boundingBox.min), to: sceneView.scene.rootNode)
+        let max = mainHat.convertPosition((mainHat.boundingBox.max), to: sceneView.scene.rootNode)
+        // check if within these area return TRUE
+        if node.presentation.position.x < max.x &&
+            node.presentation.position.x > min.x &&
+            node.presentation.position.y < max.y &&
+            node.presentation.position.y > min.y &&
+            node.presentation.position.z < max.z &&
+            node.presentation.position.z > min.z {
+            return true
+        }
+        return false
+        
+    }
+    
     // MARK: - ARSCNViewDelegate
     
     func session(_ session: ARSession, cameraDidChangeTrackingState camera: ARCamera) {
@@ -312,7 +328,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
     }
     
-    
     func session(_ session: ARSession, didFailWithError error: Error) {
         // Present an error message to the user
         
@@ -329,35 +344,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
 }
 
-extension SCNNode {
-    func boundingBoxContains(point: SCNVector3, in node: SCNNode) -> Bool {
-        let localPoint = self.convertPosition(point, from: node)
-        return boundingBoxContains(point: localPoint)
-    }
-    
-    func boundingBoxContains(point: SCNVector3) -> Bool {
-        return BoundingBox(self.boundingBox).contains(point)
-    }
-}
-struct BoundingBox {
-    let min: SCNVector3
-    let max: SCNVector3
-    
-    init(_ boundTuple: (min: SCNVector3, max: SCNVector3)) {
-        min = boundTuple.min
-        max = boundTuple.max
-    }
-    
-    func contains(_ point: SCNVector3) -> Bool {
-        let contains =
-            min.x <= point.x &&
-                min.y <= point.y &&
-                min.z <= point.z &&
-                
-                max.x > point.x &&
-                max.y > point.y &&
-                max.z > point.z
-        
-        return contains
-    }
-}
+
+
+
