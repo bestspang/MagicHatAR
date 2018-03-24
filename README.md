@@ -5,6 +5,7 @@
 - open the 'MagicHatAR' app
 - follow in-game instructions (at the center of the screen)
 <img src="https://github.com/bestspang/MagicHatAR/blob/master/screenshot.PNG" width="300"/>
+
 - move your iphone's camera around
 - after the plane was found tap the screen to place the Magic Hat
 - then tap again to fire the ball
