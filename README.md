@@ -1,5 +1,5 @@
 # MagicHatAR
-- Version 9.2 (9C40b)
+- Xcode Version 9.2 (9C40b)
 - tested with iphoneX 11.2.6
 ## Instructions
 - open the 'MagicHatAR' app
